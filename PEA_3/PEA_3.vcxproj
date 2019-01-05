@@ -115,6 +115,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ATSP.cpp" />
+    <ClCompile Include="ATSPSolver.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MeasurementDataPoint.cpp" />
+    <ClCompile Include="MeasurementEngine.cpp" />
+    <ClCompile Include="menu.cpp" />
+    <ClCompile Include="Solution.cpp" />
+    <ClCompile Include="StopCondition.cpp" />
+    <ClCompile Include="TestingSuite.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ATSP.h" />
+    <ClInclude Include="ATSPSolver.h" />
+    <ClInclude Include="MeasurementDataPoint.h" />
+    <ClInclude Include="MeasurementEngine.h" />
+    <ClInclude Include="Menu.h" />
+    <ClInclude Include="Solution.h" />
+    <ClInclude Include="StopCondition.h" />
+    <ClInclude Include="TestingSuite.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
