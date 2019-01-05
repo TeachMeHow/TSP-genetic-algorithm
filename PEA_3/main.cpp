@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <algorithm>
 #include "TestingSuite.h"
-
+#include "GeneticAlgorithm.h"
 
 
 int main() {
@@ -21,7 +21,9 @@ int main() {
 	// initialize the problem
 	ATSP problem;
 	problem.read_file("ftv47.atsp");
-	
+	GeneticAlgorithm algorithm = GeneticAlgorithm(20, 0.1, 5);
+	StopCondition stop_condition = StopCondition(2000, 0);
+	algorithm.run(&problem, &stop_condition);
 	menu_loop(problem);
 	TestingSuite suite;
 	//suite.run_tests();
