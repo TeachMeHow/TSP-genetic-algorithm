@@ -1,6 +1,7 @@
 #include "GeneticAlgorithm.h"
 #include <map>
-
+#include <iostream>
+#define DEBUG 0
 
 std::vector<Solution> GeneticAlgorithm::FP_selection(std::vector<Solution>* population)
 {
@@ -63,6 +64,35 @@ std::vector<Solution> GeneticAlgorithm::initial_population()
 	return population;
 }
 
+void GeneticAlgorithm::inv_mutation(std::vector<Solution>* population)
+{
+	for (Solution & sol : *population)
+	{
+		double random = rand() / RAND_MAX;
+		if (random < mutation_p)
+		{
+			auto path = sol.get_path();
+			int i_s = 0;
+			int i_e = 0;
+			while (i_s == i_e)
+			{
+				i_s = rand() % (path.size() - 2);
+				i_e = rand() % (path.size() - 2);
+				if (i_s > i_e)
+				{
+					int buf = i_s;
+					i_s = i_e;
+					i_e = buf;
+				}
+			}
+			i_s++;
+			i_e++;
+			std::reverse(path.begin() + i_s, path.begin() + i_e + 1);
+			sol.set_path(path);
+		}
+	}
+}
+
 GeneticAlgorithm::GeneticAlgorithm(int population_size, double mutation_probability, int selection_size)
 {
 	this->population_size = population_size;
@@ -87,19 +117,24 @@ void GeneticAlgorithm::run(const ATSP * problem, StopCondition * stop_condition)
 		std::vector<Solution> mating_pool = FP_selection(&population);
 		//crossover - populate population with population_size number of children
 		std::vector<Solution> new_population;
+		new_population.push_back(mating_pool.front());
+#ifdef DEBUG
+		std::cout << '\n';
+		for (int v : new_population.front().get_path())
+		{
+			std::cout << '.' << v;
+		}
+#endif // DEBUG
 
 		//mutate
-		for (Solution gene : new_population)
+		inv_mutation(&new_population);
+#ifdef DEBUG
+		std::cout << '\n';
+		for (int v : new_population.front().get_path())
 		{
-			double result = rand() / RAND_MAX;
-			if (result < mutation_p)
-			{
-				/*
-				ref to gene!
-				mutate(gene);
-				*/
-			}
-			// random
+			std::cout << '.' << v;
 		}
+#endif // DEBUG
+
 	}
 }
