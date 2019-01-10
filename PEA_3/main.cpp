@@ -21,9 +21,10 @@ int main() {
 	// initialize the problem
 	ATSP problem;
 	problem.read_file("ftv47.atsp");
-	GeneticAlgorithm algorithm = GeneticAlgorithm(20, 0.1, 5);
+	GeneticAlgorithm algorithm = GeneticAlgorithm(20, 0.1, 0.9, 5);
 	StopCondition stop_condition = StopCondition(2000, 0);
 	algorithm.run(&problem, &stop_condition);
+	algorithm.print_best_solution();
 	menu_loop(problem);
 	TestingSuite suite;
 	//suite.run_tests();

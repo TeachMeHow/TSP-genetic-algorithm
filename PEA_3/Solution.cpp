@@ -1,6 +1,6 @@
 #include "Solution.h"
 
-
+#define DEBUG 0 
 
 
 
@@ -12,7 +12,7 @@ Solution::Solution()
 
 Solution::Solution(std::vector<int> path)
 {
-	this->path = path;
+	set_path(path);
 }
 
 Solution::Solution(const Solution & obj)
@@ -31,10 +31,16 @@ std::vector<int> Solution::get_path() const
 
 int Solution::get_value(const ATSP & graph) const
 {
-	int value = 0;
-	for (auto it = path.cbegin() + 1; it != path.cend(); it++)
+	int value = INT_MAX;
+	if (!path.empty())
 	{
-		value += graph.get_distance(*(it - 1), *it);
+		value = 0;
+		auto first = path.cbegin();
+		for (auto second = first + 1; second != path.cend(); second++)
+		{
+			value += graph.get_distance(*first, *second);
+			first = second;
+		}
 	}
 	return value;
 }
@@ -42,4 +48,15 @@ int Solution::get_value(const ATSP & graph) const
 void Solution::set_path(std::vector<int> path)
 {
 	this->path = path;
+#ifdef DEBUG
+	auto first = path.cbegin();
+	for (auto second = first + 1; second != path.cend(); second++)
+	{
+		if (*first == *second)
+		{
+			throw "Path incorrect";
+		}
+		first = second;
+	}
+#endif
 }
