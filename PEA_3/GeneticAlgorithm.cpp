@@ -2,7 +2,7 @@
 #include <map>
 #include <iostream>
 #include <algorithm>
-#define DEBUG 0
+//#define DEBUG 0
 
 std::vector<Solution> GeneticAlgorithm::FP_selection(std::vector<Solution>* population)
 {
@@ -201,7 +201,6 @@ void GeneticAlgorithm::PX_crossover(std::vector<Solution> * mating_pool, std::ve
 					// pairs of <p_i, q_i>
 					std::vector<std::pair<int, int>> swap_table;
 
-					// TODO how does that happen - copies from [12], [13] is same as 12
 					// swap range [i_s, i_e) from q to r
 					r.insert(r.end(), q.begin() + i_s, q.begin() + i_e + 1);
 					r.insert(r.end(), q.size() - 1 - i_e, 0);
@@ -306,78 +305,127 @@ void GeneticAlgorithm::PX_crossover(std::vector<Solution> * mating_pool, std::ve
 			}
 		}
 	}
-	/*
-	std::vector<int> p = p_solution->get_path();
-	std::vector<int> q = q_solution->get_path();
-	p.pop_back();
-	p.erase(p.begin());
-	q.pop_back();
-	q.erase(q.begin());
-	std::vector<int> r = std::vector<int>(p.size());
-	std::vector<int> s = std::vector<int>(q.size());
+}
 
-	int i_s = 0;
-	int i_e = 0;
-	while (i_s == i_e)
+void GeneticAlgorithm::OX_crossover(std::vector<Solution>* mating_pool, std::vector<Solution>* new_population)
+{
+	int pool_size = mating_pool->size();
+	auto it1 = mating_pool->begin();
+	// check all mating pool combinations
+	for (it1; it1 != mating_pool->end(); it1++)
 	{
-		i_s = rand() % q.size();
-		i_e = rand() % q.size();
-		if (i_s > i_e)
+		auto it2 = it1;
+		for (it2; it2 != mating_pool->end(); it2++)
 		{
-			int buf = i_s;
-			i_s = i_e;
-			i_e = buf;
+			if (it1 != it2)
+			{
+				// get random value and do a crossover with probability crossover_p
+				double random = rand();
+				random /= RAND_MAX;
+				if (random < crossover_p)
+				{
+					// get paths and trim front and back zeroes
+					std::vector<int> p = (*it1).get_path();
+					std::vector<int> q = (*it2).get_path();
+					p.pop_back();
+					p.erase(p.begin());
+					q.pop_back();
+					q.erase(q.begin());
+
+					// 1.
+					// get two indexes for PMX crossover
+					int i_s = 0;
+					int i_e = 0;
+					while (i_s == i_e)
+					{
+						i_s = rand() % q.size();
+						i_e = rand() % q.size();
+						if (i_s > i_e)
+						{
+							int buf = i_s;
+							i_s = i_e;
+							i_e = buf;
+						}
+					}
+
+					// create two vectors with indexes ending at i_s - 1
+					std::vector<int> r = std::vector<int>(i_s);
+					std::vector<int> s = std::vector<int>(i_s);
+
+					// swap range [i_s, i_e) from q to r
+					r.insert(r.end(), q.begin() + i_s, q.begin() + i_e + 1);
+					r.insert(r.end(), q.size() - 1 - i_e, 0);
+
+					// swap range [i_s, i_e) from p to s
+					s.insert(s.end(), p.begin() + i_s, p.begin() + i_e + 1);
+					s.insert(s.end(), p.size() - 1 - i_e, 0);
+
+					auto p_it = p.begin() + i_e + 1;
+					auto r_it = r.begin() + i_e + 1;
+					while (r_it != r.begin() + i_s)
+					{
+						// iterator at the end of both vectors
+						if (p_it == p.end())
+						{
+							p_it = p.begin();
+						}
+						// go to beginning if 
+						if (r_it == r.end())
+						{
+							r_it = r.begin();
+						}
+						// if not found, copy *p_it to *r_it and advance both
+						if (std::find(r.begin() + i_s, r.begin() + i_e + 1, *p_it) == r.begin() + i_e + 1)
+						{
+							*r_it = *p_it;
+							r_it++;
+							p_it++;
+						}
+						// if found, advance p_it
+						else
+						{
+							p_it++;
+						}
+					}
+
+					auto q_it = q.begin() + i_e + 1;
+					auto s_it = s.begin() + i_e + 1;
+					while (s_it != s.begin() + i_s)
+					{
+						if (q_it == q.end())
+						{
+							q_it = q.begin();
+						}
+						if (s_it == s.end())
+						{
+							s_it = s.begin();
+						}
+
+						if (std::find(s.begin() + i_s, s.begin() + i_e + 1, *q_it) == s.begin() + i_e + 1)
+						{
+							*s_it = *q_it;
+							s_it++;
+							q_it++;
+						}
+						else
+						{
+							q_it++;
+						}
+					}
+
+					// insert zero front and back
+					r.insert(r.begin(), 0);
+					r.push_back(0);
+					s.insert(s.begin(), 0);
+					s.push_back(0);
+
+					// add two children to population
+					new_population->emplace_back(r);
+					new_population->emplace_back(s);
+				}
+			}
 		}
 	}
-	std::vector<std::pair<int, int>> swap_table;
-	for (int i = i_s; i <= i_e; i++)
-	{
-		r[i] = q[i];
-		s[i] = p[i];
-		swap_table.emplace_back(p[i], q[i]);
-	}
-	for (int i = 0; i < r.size(); i++)
-	{
-		if (i >= i_s && i <= i_e) 
-			continue;
-		int swap_val = p[i];
-		auto ind = std::find_if(swap_table.cbegin(), swap_table.cend(), [&swap_val](const std::pair<int, int>& element) { return element.second == swap_val; });
-		if (ind == swap_table.cend())
-		{
-			r[i] = swap_val;
-		}
-		else
-		{
-			r[i] = (*ind).first;
-		}
-		swap_val = q[i];
-		ind = std::find_if(swap_table.cbegin(), swap_table.cend(), [&swap_val](const std::pair<int, int>& element) { return element.first == swap_val; });
-		if (ind == swap_table.cend())
-		{
-			s[i] = swap_val;
-		}
-		else
-		{
-			s[i] = (*ind).second;
-		}
-	}
-	std::vector<int> r_path;
-	std::vector<int> s_path;
-	r_path.push_back(0);
-	for (int elem : r)
-	{
-		r_path.push_back(elem);
-	}
-	r_path.push_back(0);
-	s_path.push_back(0);
-	for (int elem : s)
-	{
-		s_path.push_back(elem);
-	}
-	s_path.push_back(0);
-	r_solution->set_path(r_path);
-	s_solution->set_path(s_path);
-	*/
 }
 
 void GeneticAlgorithm::find_best_solution(std::vector<Solution>* population)
@@ -426,6 +474,7 @@ void GeneticAlgorithm::run(const ATSP * problem, StopCondition * stop_condition)
 		//crossover - populate population with population_size number of children
 		std::vector<Solution> new_population;
 		PX_crossover(&mating_pool, &new_population);
+		//OX_crossover(&mating_pool, &new_population);
 		//mutate
 		inv_mutation(&new_population);
 #ifdef DEBUG

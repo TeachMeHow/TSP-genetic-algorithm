@@ -31,6 +31,7 @@ private:
 	// populates new population using chromosomes from mating pool, with probability of crossover_p
 	// crossover_p - 1 = every member with every member, 0 - every member with noone
 	void PX_crossover(std::vector<Solution> * mating_pool, std::vector<Solution> * new_population);
+	void OX_crossover(std::vector<Solution> * mating_pool, std::vector<Solution> * new_population);
 	void find_best_solution(std::vector<Solution> * population);
 public:
 	GeneticAlgorithm(int population_size, double mutation_probability, double crossover_probability, int selection_size);
