@@ -28,6 +28,7 @@ private:
 	std::vector<Solution> BEST_selection(std::vector<Solution> * population);
 	std::vector<Solution> initial_population();
 	void inv_mutation(std::vector<Solution> * population);
+	void swap_mutation(std::vector<Solution> * population);
 	// populates new population using chromosomes from mating pool, with probability of crossover_p
 	// crossover_p - 1 = every member with every member, 0 - every member with noone
 	void PX_crossover(std::vector<Solution> * mating_pool, std::vector<Solution> * new_population);

@@ -153,6 +153,36 @@ void GeneticAlgorithm::inv_mutation(std::vector<Solution>* population)
 	}
 }
 
+void GeneticAlgorithm::swap_mutation(std::vector<Solution>* population)
+{
+
+	for (Solution & sol : *population)
+	{
+		double random = rand() / RAND_MAX;
+		if (random < mutation_p)
+		{
+			auto path = sol.get_path();
+			int i_s = 0;
+			int i_e = 0;
+			while (i_s == i_e)
+			{
+				i_s = rand() % (path.size() - 2);
+				i_e = rand() % (path.size() - 2);
+				if (i_s > i_e)
+				{
+					int buf = i_s;
+					i_s = i_e;
+					i_e = buf;
+				}
+			}
+			i_s++;
+			i_e++;
+			std::swap(*(path.begin() + i_s), *(path.begin() + i_e));
+			sol.set_path(path);
+		}
+	}
+}
+
 void GeneticAlgorithm::PX_crossover(std::vector<Solution> * mating_pool, std::vector<Solution> * new_population)
 {
 	int pool_size = mating_pool->size();
@@ -477,6 +507,7 @@ void GeneticAlgorithm::run(const ATSP * problem, StopCondition * stop_condition)
 		//OX_crossover(&mating_pool, &new_population);
 		//mutate
 		inv_mutation(&new_population);
+		//swap_mutation(&population);
 #ifdef DEBUG
 		long total = 0;
 		for (Solution sol : population)
