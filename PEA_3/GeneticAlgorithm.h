@@ -25,6 +25,7 @@ private:
 	// select 
 	std::vector<Solution> FP_selection(std::vector<Solution> * population);
 	std::vector<Solution> TN_selection(std::vector<Solution>* population);
+	std::vector<Solution> BEST_selection(std::vector<Solution> * population);
 	std::vector<Solution> initial_population();
 	void inv_mutation(std::vector<Solution> * population);
 	// populates new population using chromosomes from mating pool, with probability of crossover_p

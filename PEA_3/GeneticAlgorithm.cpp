@@ -2,27 +2,27 @@
 #include <map>
 #include <iostream>
 #include <algorithm>
-//#define DEBUG 0
+#define DEBUG 0
 
 std::vector<Solution> GeneticAlgorithm::FP_selection(std::vector<Solution>* population)
 {
 
 	std::vector<Solution> mating_pool;
-	/*
 	while (mating_pool.size() < selection_size)
 	{
-		int total_distance = 0;
+		double total_distance = 0;
 		double normalized_p = 0.0;
 		std::vector<std::pair<Solution, double>> pairs;
 		for (Solution p : *population)
 		{
-			int solution_value = p.get_value(*problem);
-
+			double solution_value = p.get_value(*problem);
+			solution_value = 1.0 / solution_value;
 			total_distance += solution_value;
 		}
 		for (Solution p : *population)
 		{
 			double probability = p.get_value(*problem);
+			probability = 1.0 / probability;
 			probability /= total_distance;
 			normalized_p += probability;
 			pairs.push_back(std::pair<Solution, double>(p, normalized_p));
@@ -41,53 +41,58 @@ std::vector<Solution> GeneticAlgorithm::FP_selection(std::vector<Solution>* popu
 		}
 
 	}
-	*/
-	while (mating_pool.size() < selection_size)
-	{
-		Solution best;
-		int best_value = INT_MAX;
-		auto best_it = population->begin();
-		for (auto it = population->begin(); it != population->end(); it++)
-		{
-			int value = it->get_value(*problem);
-			if (value < best_value)
-			{
-				best = *it;
-				best_value = value;
-				best_it = it;
-			}
-
-		}
-		population->erase(best_it);
-		mating_pool.push_back(best);
-	}
 	return mating_pool;
 }
 
 std::vector<Solution> GeneticAlgorithm::TN_selection(std::vector<Solution>* population)
 {
-	int k = 20;
-	double p = 0.8;
+	int k = 5;
+	double p = 0.9;
 	std::vector<Solution> selection;
 	// select k individuals
-	std::vector<Solution> tournament;
-	for (int i = 0; i < k; i++)
+	while (selection.size() < 2)
 	{
-		int random = rand() % (population->size() - 2);
-		random += 1;
-		tournament.push_back(*(population->begin() + random));
-	}
-	std::sort(tournament.begin(), tournament.end(), [&](const Solution & sol1, const Solution & sol2) { return sol1.get_value(*problem) < sol2.get_value(*problem); });
-	for (int i = 0; i < tournament.size(); i++)
-	{
-		double random = rand();
-		random /= (double)INT_MAX;
-		double probability = p * (std::pow(1.0 - p, i));
-		if (random < probability)
+		std::vector<Solution> tournament;
+		for (int i = 0; i < k; i++)
 		{
-			selection.push_back(tournament[i]);
+			int random = rand() % (population->size() - 2);
+			random += 1;
+			tournament.push_back(*(population->begin() + random));
 		}
+		std::sort(tournament.begin(), tournament.end(), [&](const Solution & sol1, const Solution & sol2) { return sol1.get_value(*problem) < sol2.get_value(*problem); });
+		for (int i = 0; i < tournament.size(); i++)
+		{
+			double random = rand();
+			random /= (double)INT_MAX;
+			double probability = p * (std::pow(1.0 - p, i));
+			if (random < probability)
+			{
+				selection.push_back(tournament[i]);
+			}
 
+		}
+	}
+	return selection;
+}
+
+std::vector<Solution> GeneticAlgorithm::BEST_selection(std::vector<Solution>* population)
+{
+	std::vector<Solution> selection;
+	while (selection.size() < 6)
+	{
+		int best_val = INT_MAX;
+		auto best_solution = population->begin();
+		for (auto it = population->begin(); it != population->end(); it++)
+		{
+			int val = it->get_value(*problem);
+			if (val < best_val)
+			{
+				best_solution = it;
+				best_val = val;
+			}
+		}
+		selection.push_back(*best_solution);
+		population->erase(best_solution);
 	}
 	return selection;
 }
@@ -415,21 +420,29 @@ void GeneticAlgorithm::run(const ATSP * problem, StopCondition * stop_condition)
 	while (!stop_condition->check())
 	{
 		// select from population
+		std::vector<Solution> mating_pool = BEST_selection(&population);
 		//std::vector<Solution> mating_pool = FP_selection(&population);
-		std::vector<Solution> mating_pool = TN_selection(&population);
+		//std::vector<Solution> mating_pool = TN_selection(&population);
 		//crossover - populate population with population_size number of children
 		std::vector<Solution> new_population;
 		PX_crossover(&mating_pool, &new_population);
 		//mutate
 		inv_mutation(&new_population);
+#ifdef DEBUG
+		long total = 0;
+		for (Solution sol : population)
+		{
+			total += sol.get_value(*problem);
+		}
+		long average = total;
+		average = total / population.size();
+		std::cout << "Generation " << gen_cnt << " average: " << average << std::endl;
+#endif
 		// find best solution from new population
 		find_best_solution(&new_population);
 		// population is new population now
 		population = new_population;
 		gen_cnt++;
-#ifdef DEBUG
-		std::cout << "Generation: " << gen_cnt << std::endl;
-#endif
 	}
 }
 
