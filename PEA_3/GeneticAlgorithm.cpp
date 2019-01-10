@@ -2,11 +2,13 @@
 #include <map>
 #include <iostream>
 #include <algorithm>
-#define DEBUG 0
+//#define DEBUG 0
 
 std::vector<Solution> GeneticAlgorithm::FP_selection(std::vector<Solution>* population)
 {
+
 	std::vector<Solution> mating_pool;
+	/*
 	while (mating_pool.size() < selection_size)
 	{
 		int total_distance = 0;
@@ -15,6 +17,7 @@ std::vector<Solution> GeneticAlgorithm::FP_selection(std::vector<Solution>* popu
 		for (Solution p : *population)
 		{
 			int solution_value = p.get_value(*problem);
+
 			total_distance += solution_value;
 		}
 		for (Solution p : *population)
@@ -37,6 +40,26 @@ std::vector<Solution> GeneticAlgorithm::FP_selection(std::vector<Solution>* popu
 
 		}
 
+	}
+	*/
+	while (mating_pool.size() < selection_size)
+	{
+		Solution best;
+		int best_value = INT_MAX;
+		auto best_it = population->begin();
+		for (auto it = population->begin(); it != population->end(); it++)
+		{
+			int value = it->get_value(*problem);
+			if (value < best_value)
+			{
+				best = *it;
+				best_value = value;
+				best_it = it;
+			}
+
+		}
+		population->erase(best_it);
+		mating_pool.push_back(best);
 	}
 	return mating_pool;
 }
@@ -122,6 +145,7 @@ void GeneticAlgorithm::PX_crossover(std::vector<Solution> * mating_pool, std::ve
 					q.pop_back();
 					q.erase(q.begin());
 
+					// 1.
 					// get two indexes for PMX crossover
 					int i_s = 0;
 					int i_e = 0;
@@ -163,96 +187,77 @@ void GeneticAlgorithm::PX_crossover(std::vector<Solution> * mating_pool, std::ve
 						swap_table.emplace_back(*p_iter, *q_iter);
 					}
 
-					// fill the rest of the table
-					// if values don't cause conflicts copy to r straight from p
-					// and to s straight from q
-					// else copy corresponding values from swap table
-					auto r_iter = r.begin();
-					auto s_iter = s.begin();
-					p_iter = p.begin();
-					q_iter = q.begin();
-					for (r_iter, s_iter; r_iter != r.end() && s_iter != s.end(); r_iter++, s_iter++, p_iter++, q_iter++)
+					// 2.
+					for (int i = i_s; i < i_e + 1; i++)
 					{
-						if (r_iter == r.begin() + i_s)
+						int value = p[i];
+						int ind = i;
+						if (std::find(r.begin() + i_s, r.begin() + i_e + 1, value) == r.begin() + i_e + 1)
 						{
-							r_iter = r.begin() + i_e + 1;
-							p_iter = p.begin() + i_e + 1;
-							if (r_iter == r.end() || p_iter == p.end()) break;
+							int q_value;
+						step_i:
+							// i
+							q_value = q[ind];
+							// ii
+							ind = 0;
+							while (p[ind] != q_value)
+							{
+								ind++;
+							}
+							// iii
+							if (ind >= i_s && ind <= i_e)
+							{
+								goto step_i;
+							}
+							// iv
+							r[ind] = value;
 						}
-						if (s_iter == s.begin() + i_s)
+					}
+					for (int i = i_s; i < i_e + 1; i++)
+					{
+						int value = q[i];
+						int ind = i;
+						if (std::find(s.begin() + i_s, s.begin() + i_e + 1, value) == s.begin() + i_e + 1)
 						{
-							s_iter = s.begin() + i_e + 1;
-							q_iter = q.begin() + i_e + 1;
-							if (s_iter == s.end() || q_iter == q.end()) break;
+							int p_value;
+						step_j:
+							// i
+							p_value = p[ind];
+							// ii
+							ind = 0;
+							while (q[ind] != p_value)
+							{
+								ind++;
+							}
+							// iii
+							if (ind >= i_s && ind <= i_e)
+							{
+								goto step_j;
+							}
+							// iv
+							s[ind] = value;
 						}
-
-						auto first = r.begin() + i_s;
-						auto last = r.begin() + i_e + 1;
-						if (std::find(first, last, *p_iter) == last)
+					}
+					// 3.
+					for (auto r_iter = r.begin(), p_iter = p.begin();
+						r_iter != r.end();
+						r_iter++, p_iter++)
+					{
+						if (*r_iter == 0)
 						{
 							*r_iter = *p_iter;
 						}
-						else
-						{
-							// value *p_iter was on index p_iter, but the same value was copied from q
-							// what value in vector p was replaced by q of the same value as *p_iter?
-							auto pair = std::find_if(swap_table.begin(), swap_table.end(), [&p_iter](const std::pair<int, int> & v) { return v.second == *p_iter; });
-							*r_iter = (*pair).first;
-						}
-
-						first = s.begin() + i_s;
-						last = s.begin() + i_e + 1;
-						if (std::find(first, last, *q_iter) == last)
+					}
+					for (auto s_iter = s.begin(), q_iter = q.begin();
+						s_iter != s.end();
+						s_iter++, q_iter++)
+					{
+						if (*s_iter == 0)
 						{
 							*s_iter = *q_iter;
 						}
-						else
-						{
-							// value *q_iter was on index q_iter, but the same value from vector p was copied
-							// find what value from vector q was replaced by the same value from vector p
-							auto pair = std::find_if(swap_table.begin(), swap_table.end(), [&q_iter](const std::pair<int, int> & v) { return v.first == *q_iter;  });
-							*s_iter = (*pair).second;
+					}
 
-						}
-					}
-					// insert rest using swap table
-					//for (r_iter; )
-					
-
-					/*
-					std::vector<std::pair<int, int>> swap_table;
-					for (int i = i_s; i <= i_e; i++)
-					{
-						r[i] = q[i];
-						s[i] = p[i];
-						swap_table.emplace_back(p[i], q[i]);
-					}
-					for (int i = 0; i < r.size(); i++)
-					{
-						if (i >= i_s && i <= i_e)
-							continue;
-						int swap_val = p[i];
-						auto ind = std::find_if(swap_table.cbegin(), swap_table.cend(), [&swap_val](const std::pair<int, int>& element) { return element.second == swap_val; });
-						if (ind == swap_table.cend())
-						{
-							r[i] = swap_val;
-						}
-						else
-						{
-							r[i] = (*ind).first;
-						}
-						swap_val = q[i];
-						ind = std::find_if(swap_table.cbegin(), swap_table.cend(), [&swap_val](const std::pair<int, int>& element) { return element.first == swap_val; });
-						if (ind == swap_table.cend())
-						{
-							s[i] = swap_val;
-						}
-						else
-						{
-							s[i] = (*ind).second;
-						}
-					}
-					*/
 
 					// insert zero front and back
 					r.insert(r.begin(), 0);
@@ -352,6 +357,7 @@ void GeneticAlgorithm::find_best_solution(std::vector<Solution>* population)
 		if (value < best_found_value)
 		{
 			best_found = sol;
+			best_found_value = value;
 		}
 	}
 	if (best_found_value < best_solution.get_value(*problem))
