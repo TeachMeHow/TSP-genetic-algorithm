@@ -78,7 +78,7 @@ std::vector<Solution> GeneticAlgorithm::TN_selection(std::vector<Solution>* popu
 std::vector<Solution> GeneticAlgorithm::BEST_selection(std::vector<Solution>* population)
 {
 	std::vector<Solution> selection;
-	while (selection.size() < 10)
+	while (selection.size() < 15)
 	{
 		int best_val = INT_MAX;
 		auto best_solution = population->begin();
