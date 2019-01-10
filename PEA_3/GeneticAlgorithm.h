@@ -19,6 +19,7 @@ private:
 	std::vector<Solution> FP_selection(std::vector<Solution> * population);
 	std::vector<Solution> initial_population();
 	void inv_mutation(std::vector<Solution> * population);
+	void PX_crossover(Solution * p, Solution * q, Solution * r, Solution * s);
 public:
 	GeneticAlgorithm(int population_size, double mutation_probability, int selection_size);
 	~GeneticAlgorithm();
