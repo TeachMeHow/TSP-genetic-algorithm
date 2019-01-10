@@ -64,6 +64,34 @@ std::vector<Solution> GeneticAlgorithm::FP_selection(std::vector<Solution>* popu
 	return mating_pool;
 }
 
+std::vector<Solution> GeneticAlgorithm::TN_selection(std::vector<Solution>* population)
+{
+	int k = 20;
+	double p = 0.8;
+	std::vector<Solution> selection;
+	// select k individuals
+	std::vector<Solution> tournament;
+	for (int i = 0; i < k; i++)
+	{
+		int random = rand() % (population->size() - 2);
+		random += 1;
+		tournament.push_back(*(population->begin() + random));
+	}
+	std::sort(tournament.begin(), tournament.end(), [&](const Solution & sol1, const Solution & sol2) { return sol1.get_value(*problem) < sol2.get_value(*problem); });
+	for (int i = 0; i < tournament.size(); i++)
+	{
+		double random = rand();
+		random /= (double)INT_MAX;
+		double probability = p * (std::pow(1.0 - p, i));
+		if (random < probability)
+		{
+			selection.push_back(tournament[i]);
+		}
+
+	}
+	return selection;
+}
+
 std::vector<Solution> GeneticAlgorithm::initial_population()
 {
 	std::vector<Solution> population;
@@ -387,7 +415,8 @@ void GeneticAlgorithm::run(const ATSP * problem, StopCondition * stop_condition)
 	while (!stop_condition->check())
 	{
 		// select from population
-		std::vector<Solution> mating_pool = FP_selection(&population);
+		//std::vector<Solution> mating_pool = FP_selection(&population);
+		std::vector<Solution> mating_pool = TN_selection(&population);
 		//crossover - populate population with population_size number of children
 		std::vector<Solution> new_population;
 		PX_crossover(&mating_pool, &new_population);
