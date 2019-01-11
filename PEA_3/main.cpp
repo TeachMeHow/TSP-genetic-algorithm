@@ -10,8 +10,8 @@
 #include "TestingSuite.h"
 #include "GeneticAlgorithm.h"
 
-#define PERFORMANCE 0
-//#define MENU 0
+//#define PERFORMANCE 0
+#define MENU 0
 //#define DEBUG 0
 
 
@@ -29,6 +29,7 @@ int main() {
 	algorithm.print_best_solution();
 #endif
 #ifdef MENU
+	ATSP problem = ATSP();
 	menu_loop(problem);
 #endif
 	return 0;

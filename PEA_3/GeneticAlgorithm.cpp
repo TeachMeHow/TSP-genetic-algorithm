@@ -4,11 +4,11 @@
 #include <iostream>
 #include <algorithm>
 //#define DEBUG 0
-#define PERFORMANCE 0
+//#define PERFORMANCE 0
 
 // 0 = PMX
 // 1 = OX
-#define CROSSOVER_METHOD 1
+#define CROSSOVER_METHOD 0
 
 std::vector<Solution> GeneticAlgorithm::FP_selection(std::vector<Solution>* population)
 {
@@ -560,4 +560,9 @@ void GeneticAlgorithm::print_best_solution()
 	std::cout << "Best solution: " << best_solution.get_value(*problem) << std::endl;
 	std::cout << "Total generations: " << gen_cnt << std::endl;
 	std::cout << "Total mutations: " << mut_cnt << std::endl;
+	for (int v : best_solution.get_path())
+	{
+		std::cout << "->" << v;
+	}
+	std::cout << std::endl;
 }

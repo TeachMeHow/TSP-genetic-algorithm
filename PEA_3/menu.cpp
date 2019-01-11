@@ -3,6 +3,7 @@
 #include <iostream>
 #include "Menu.h"
 #include "ATSPSolver.h"
+#include "GeneticAlgorithm.h"
 
 using std::cout;
 using std::endl;
@@ -35,6 +36,14 @@ bool _call(char x, ATSP& problem)
 	int i_x = x - 0x30;
 	std::string filename;
 	int i;
+	int method;
+	int initial_population;
+	double m_p;
+	double x_p;
+	int population;
+	int time;
+	int iterations; 
+	GeneticAlgorithm * algo = nullptr;
 	switch (i_x)
 	{
 	case 1: cout << "Nazwa pliku: ";
@@ -44,12 +53,32 @@ bool _call(char x, ATSP& problem)
 	case 2: problem.print_data();
 		system("pause");
 		break;
-	case 3: cout << "Wybierz metode: \n1. Nearest neighbor";
+	case 3: cout << "Wybierz metode: \n1. PMX \n2. OX";
+		cin >> method;
+		cout << "Licznosc populacji poczatkowej: ";
+		cin >> initial_population;
+		cout << "Prawdopodobienstwo mutacji: ";
+		cin >> m_p;
+		cout << "Prawdopodobienstwo krzyzowania";
+		cin >> x_p;
+		cout << "Licznosc populacji: ";
+		cin >> population;
+		cout << "Kryterium stopu: \n1. Czas (ms) \n2. Iteracje";
 		cin >> i;
-		if (i == 1) {
-			Solution solution = ATSPSolver().nearest_neighbor(problem);
-			print_solution(problem, solution);
+		if (i == 1)
+		{
+			cin >> time;
+			iterations = 0;
 		}
+		else if (i == 2)
+		{
+			cin >> iterations;
+			time = 0;
+		}
+		algo = new GeneticAlgorithm(initial_population, m_p, x_p, population);
+		algo->run(&problem, &StopCondition(time, iterations));
+		algo->print_best_solution();
+		
 		cout << endl;
 		system("pause");
 		break;
@@ -59,6 +88,8 @@ bool _call(char x, ATSP& problem)
 		return false;
 	default: break;
 	}
+	if (algo != nullptr)
+		delete algo;
 	return true;
 }
 
