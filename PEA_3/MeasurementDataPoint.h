@@ -6,14 +6,22 @@ class MeasurementDataPoint
 {
 private: 
 	std::chrono::milliseconds elapsed_time_ms;
-	int iteration_count;
+	int gen_cnt;
+	int mut_cnt;
 	int solution_value;
 public:
-	MeasurementDataPoint(std::chrono::milliseconds elapsed_time, int iteration_count , int solution_value);
+	MeasurementDataPoint(std::chrono::milliseconds elapsed_time_ms,
+	int gen_cnt,
+	int mut_cnt,
+	int solution_value);
 	~MeasurementDataPoint();
-	double get_elapsed_time_ms();
-	int get_iteration_count();
-	int get_solution_value();
+	// data point for csv file
+	std::string to_string();
+	int get_value();
+	int get_gen_cnt();
+	int get_mut_cnt();
+	int get_elapsed_time_ms();
+	
 
 };
 

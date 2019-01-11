@@ -10,24 +10,27 @@
 #include "TestingSuite.h"
 #include "GeneticAlgorithm.h"
 
+#define PERFORMANCE 0
+//#define MENU 0
+//#define DEBUG 0
+
 
 int main() {
-
-	//std::vector<int> vec = { 1 , 2 };
-	//auto first = vec.begin() + 0;
-	//auto last = vec.end() - 1;
-	//vec.erase(first);
-	//int second = *last;
-	// initialize the problem
+#ifdef PERFORMANCE
+	TestingSuite suite;
+	suite.run_tests();
+#endif
+#ifdef DEBUG
 	ATSP problem;
 	problem.read_file("ftv47.atsp");
 	GeneticAlgorithm algorithm = GeneticAlgorithm(20, 0.01, 0.8, 5);
 	StopCondition stop_condition = StopCondition(120 * 1000, 0);
 	algorithm.run(&problem, &stop_condition);
 	algorithm.print_best_solution();
+#endif
+#ifdef MENU
 	menu_loop(problem);
-	TestingSuite suite;
-	//suite.run_tests();
+#endif
 	return 0;
 }
 

@@ -1,8 +1,14 @@
 #include "GeneticAlgorithm.h"
+#include "MeasurementEngine.h";
 #include <map>
 #include <iostream>
 #include <algorithm>
 //#define DEBUG 0
+#define PERFORMANCE 0
+
+// 0 = PMX
+// 1 = OX
+#define CROSSOVER_METHOD 1
 
 std::vector<Solution> GeneticAlgorithm::FP_selection(std::vector<Solution>* population)
 {
@@ -78,7 +84,7 @@ std::vector<Solution> GeneticAlgorithm::TN_selection(std::vector<Solution>* popu
 std::vector<Solution> GeneticAlgorithm::BEST_selection(std::vector<Solution>* population)
 {
 	std::vector<Solution> selection;
-	while (selection.size() < 10)
+	while (selection.size() < selection_size)
 	{
 		int best_val = INT_MAX;
 		auto best_solution = population->begin();
@@ -492,22 +498,40 @@ GeneticAlgorithm::~GeneticAlgorithm()
 
 void GeneticAlgorithm::run(const ATSP * problem, StopCondition * stop_condition)
 {
+#ifdef PERFORMANCE
+	MeasurementEngine me = MeasurementEngine();
+#endif
 	this->problem_size = problem->get_size();
 	this->problem = problem;
 	std::vector<Solution> population = initial_population();
+	if (population.size() == 0)
+		throw "ERROR";
 	while (!stop_condition->check())
 	{
+#ifdef PERFORMANCE
+		me.poll(stop_condition->get_elapsed_time(), gen_cnt, mut_cnt, best_solution.get_value(*problem));
+#endif
 		// select from population
 		std::vector<Solution> mating_pool = BEST_selection(&population);
+		/*
 		//std::vector<Solution> mating_pool = FP_selection(&population);
 		//std::vector<Solution> mating_pool = TN_selection(&population);
+		*/
 		//crossover - populate population with population_size number of children
 		std::vector<Solution> new_population;
-		PX_crossover(&mating_pool, &new_population);
-		//OX_crossover(&mating_pool, &new_population);
+		if (CROSSOVER_METHOD == 0)
+		{
+			PX_crossover(&mating_pool, &new_population);
+		}
+		else if (CROSSOVER_METHOD == 1)
+		{
+			OX_crossover(&mating_pool, &new_population);
+		}
 		//mutate
 		inv_mutation(&new_population);
-		//swap_mutation(&population);
+		/*
+		swap_mutation(&population);
+		*/
 #ifdef DEBUG
 		long total = 0;
 		for (Solution sol : population)
@@ -524,6 +548,11 @@ void GeneticAlgorithm::run(const ATSP * problem, StopCondition * stop_condition)
 		population = new_population;
 		gen_cnt++;
 	}
+#ifdef PERFORMANCE
+	std::string str = "ga_size" + std::to_string(problem_size) +
+		"_population" + std::to_string(selection_size) + "method" + std::to_string(CROSSOVER_METHOD) + ".csv";
+	me.print_to_csv_file(str.c_str());
+#endif
 }
 
 void GeneticAlgorithm::print_best_solution()
