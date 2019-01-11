@@ -4,11 +4,11 @@
 #include <iostream>
 #include <algorithm>
 //#define DEBUG 0
-//#define PERFORMANCE 0
+#define PERFORMANCE 0
 
 // 0 = PMX
 // 1 = OX
-#define CROSSOVER_METHOD 0
+#define CROSSOVER_METHOD 1
 
 std::vector<Solution> GeneticAlgorithm::FP_selection(std::vector<Solution>* population)
 {
@@ -84,6 +84,8 @@ std::vector<Solution> GeneticAlgorithm::TN_selection(std::vector<Solution>* popu
 std::vector<Solution> GeneticAlgorithm::BEST_selection(std::vector<Solution>* population)
 {
 	std::vector<Solution> selection;
+	if (population->empty())
+		throw "ERROR";
 	while (selection.size() < selection_size)
 	{
 		int best_val = INT_MAX;

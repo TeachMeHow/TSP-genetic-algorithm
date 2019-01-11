@@ -35,22 +35,24 @@ void TestingSuite::run_tests()
 			ga.run(&small_problem, &condition);
 		}
 		/*/
-		/*
+		//*
 		{
+			ATSP medium_problem = ATSP();
+			medium_problem.read_file("ftv170.atsp");
 			GeneticAlgorithm ga = GeneticAlgorithm(20, 0.01, 0.8, POPULATION_SIZE[i]);
 			int ms = std::chrono::duration_cast<std::chrono::milliseconds>(medium_file_test_time).count();
 			StopCondition condition = StopCondition(ms, 0);
 			ga.run(&medium_problem, &condition);
 		}
-		*/
-		//*
+		//*/
+		/*
 		{
 			GeneticAlgorithm ga = GeneticAlgorithm(20, 0.01, 0.8, POPULATION_SIZE[i]);
 			int ms = std::chrono::duration_cast<std::chrono::milliseconds>(large_file_test_time).count();
 			StopCondition condition = StopCondition(ms, 0);
 			ga.run(&large_problem, &condition);
 		}
-		//*/
+		*/
 		
 	}
 

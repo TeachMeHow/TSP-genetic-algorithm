@@ -10,8 +10,8 @@
 #include "TestingSuite.h"
 #include "GeneticAlgorithm.h"
 
-//#define PERFORMANCE 0
-#define MENU 0
+#define PERFORMANCE 0
+//#define MENU 0
 //#define DEBUG 0
 
 
